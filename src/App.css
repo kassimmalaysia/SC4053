@@ -1,5 +1,82 @@
+
 .App {
   text-align: center;
+}
+.top-bar {
+  background-color: #00008B; /* Dark blue background */
+  color: #fff; /* White text color */
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+.logo img {
+  width: 60px;
+  height: 60px;
+  margin-right: 5px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 10px;
+}
+.flex-container {
+  display: flex;
+
+  width: 100%; /* Adjust the width as needed */
+
+  
+}
+
+.big-box {
+  border: 2px solid #00008B;
+  padding: 10px;
+  margin: 10px;
+  text-align: left;
+  font-weight: bold;
+  font-size: medium;
+  height: 200px;
+}
+
+.left-box {
+  
+  flex: 1; /* Make the left box flexible to take available space */
+
+}
+
+.right-box {
+  flex: 1; /* Make the right box flexible to take available space */
+}
+
+
+.bottom-box {
+  height: 100px; /* Red background for the bottom box */
+}
+.box-headerright {
+  position: relative;
+  top: 1;
+  left: 1;
+  margin: 0;
+  
+}
+
+.box-headerleft {
+  position: relative;
+  top: 1;
+  left: 1;
+  margin: 0;
+
+  
+}
+.box-headerbottom {
+  position:relative;
+  top: 1;
+  left: 1;
+  margin: 0;
+
+ 
+  
 }
 
 .App-logo {
@@ -35,4 +112,14 @@
   to {
     transform: rotate(360deg);
   }
+}
+.background-container {
+  background-image: url('./bg.png'); /* Path to your background image */
+  background-size: cover; /* Adjust the size to cover the container */
+  background-repeat: no-repeat; /* Prevent image repetition */
+  background-attachment: fixed; /* Fixed background to prevent scrolling */
+  /* You can also set background color in case the image doesn't fully cover the container */
+  background-color: rgba(0, 0, 0, 0.5); /* Adjust the color and transparency as needed */
+  /* Add other styles for the container as necessary */
+  /* ... */
 }
