@@ -51,6 +51,8 @@ function App() {
         setHighestBid(parseFloat(formatEther(bidAmount.toString())).toPrecision(4));
         setHighestBidder(bidder.toLowerCase());
           // Fetch the number of bidders
+          const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
+          setBidderCount(bidderCount);
       
      } catch (e) {
        console.log('error fetching highest bid: ', e);
@@ -91,8 +93,7 @@ function App() {
       const wei = parseEther(value.toString());
       // Replace the next line with the actual function call to commitBid
       await contract.commitBid(domain, wei, "myhash");
-      const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
-      setBidderCount(bidderCount);
+     
 
       // Wait for the smart contract to emit the LogBid event, then update component state
       contract.on('LogBid', (_, __) => {
