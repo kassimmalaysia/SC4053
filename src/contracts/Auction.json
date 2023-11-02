@@ -1,4 +1,6 @@
-[
+{
+    "contract_name": "Auction",
+    "abi": [
 	{
 		"inputs": [
 			{
@@ -334,3 +336,4 @@
 		"type": "function"
 	}
 ]
+}

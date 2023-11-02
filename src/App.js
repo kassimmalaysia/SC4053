@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
 import logoImage from './Capture.png';
-const AuctionContractAddress = '0x1FcA85fE48310cFeAc3B8FE3DaAb9d90E1fCd3A5';
+const AuctionContractAddress = '0x5F8A26d15346686105D8Cd9373eF84A62EF99A7e';
 // The AuctionContract Address needs to change based on your remix contract
 const emptyAddress = '0x0000000000000000000000000000000000000000';
 const ethers = require("ethers")
@@ -90,7 +90,7 @@ function App() {
       // User inputs amount in terms of Ether, convert to Wei before sending to the contract.
       const wei = parseEther(value.toString());
       // Replace the next line with the actual function call to commitBid
-      await contract.commitBid(domain, wei, 'myhash');
+      await contract.commitBid(domain, wei, "myhash");
       const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
       setBidderCount(bidderCount);
 
