@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
 import logoImage from './Capture.png';
-const AuctionContractAddress = '0xf8e81D47203A594245E36C48e151709F0C19fBe8';
+const AuctionContractAddress = '0x1FcA85fE48310cFeAc3B8FE3DaAb9d90E1fCd3A5';
 // The AuctionContract Address needs to change based on your remix contract
 const emptyAddress = '0x0000000000000000000000000000000000000000';
 const ethers = require("ethers")
@@ -51,8 +51,7 @@ function App() {
         setHighestBid(parseFloat(formatEther(bidAmount.toString())).toPrecision(4));
         setHighestBidder(bidder.toLowerCase());
           // Fetch the number of bidders
-      const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
-      setBidderCount(bidderCount);
+      
      } catch (e) {
        console.log('error fetching highest bid: ', e);
      }
@@ -91,7 +90,9 @@ function App() {
       // User inputs amount in terms of Ether, convert to Wei before sending to the contract.
       const wei = parseEther(value.toString());
       // Replace the next line with the actual function call to commitBid
-      await contract.commitBid(domain, wei, secret, { value: wei });
+      await contract.commitBid(domain, wei, 'myhash');
+      const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
+      setBidderCount(bidderCount);
 
       // Wait for the smart contract to emit the LogBid event, then update component state
       contract.on('LogBid', (_, __) => {
@@ -173,7 +174,7 @@ useEffect(() => {
           {/* Content for the left box */}
           <p>Connected Account: {account}</p>
           <p>My Bid: {myBid}</p>
-    <form onSubmit={(event) => submitBid(event, domain, myBid, "myhash")}>
+    <form onSubmit={(event) => submitBid(event, domain, myBid, 'myhash')}>
     <div>
     <label htmlFor="domainInput ">Domain Name </label>
       <input
