@@ -44,12 +44,11 @@ function App() {
    if (typeof window.ethereum !== 'undefined') {
      const contract = await initializeProvider();
      try {
-       const highestBid = await contract.fetchHighestBid();
-       const { bidAmount, bidder } = highestBid;
-
+      const [highestBidder, highestBid] = await contract.fetchHighestBid();
+       
      // Convert bidAmount from Wei to Ether and round value to 4 decimal places
-        setHighestBid(parseFloat(formatEther(bidAmount.toString())).toPrecision(4));
-        setHighestBidder(bidder.toLowerCase());
+        setHighestBid(parseFloat(formatEther(highestBid.toString())).toPrecision(4));
+        setHighestBidder(highestBidder.toLowerCase());
           // Fetch the number of bidders
           const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
           setBidderCount(bidderCount);
@@ -76,7 +75,7 @@ function App() {
    if (typeof window.ethereum !== 'undefined') {
      const contract = await initializeProvider();
      try {
-       const owner = await contract.owner();
+       const owner = await contract.getOwner();
        setIsOwner(owner.toLowerCase() === account);
      } catch (e) {
        console.log('error fetching owner: ', e);

@@ -5,85 +5,6 @@
 			"inputs": [
 				{
 					"internalType": "string",
-					"name": "domain",
-					"type": "string"
-				},
-				{
-					"internalType": "uint256",
-					"name": "value",
-					"type": "uint256"
-				},
-				{
-					"internalType": "string",
-					"name": "secret",
-					"type": "string"
-				}
-			],
-			"name": "commitBid",
-			"outputs": [],
-			"stateMutability": "payable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "string",
-					"name": "domain",
-					"type": "string"
-				}
-			],
-			"name": "finalizeAuction",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "string",
-					"name": "domain",
-					"type": "string"
-				},
-				{
-					"internalType": "uint256",
-					"name": "value",
-					"type": "uint256"
-				},
-				{
-					"internalType": "string",
-					"name": "secret",
-					"type": "string"
-				}
-			],
-			"name": "revealBid",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "string",
-					"name": "domain",
-					"type": "string"
-				}
-			],
-			"name": "startCommitPhase",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [],
-			"name": "startRevealPhase",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "string",
 					"name": "",
 					"type": "string"
 				},
@@ -126,6 +47,29 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				},
+				{
+					"internalType": "uint256",
+					"name": "value",
+					"type": "uint256"
+				},
+				{
+					"internalType": "string",
+					"name": "secret",
+					"type": "string"
+				}
+			],
+			"name": "commitBid",
+			"outputs": [],
+			"stateMutability": "payable",
 			"type": "function"
 		},
 		{
@@ -240,6 +184,43 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
+			"name": "fetchHighestBid",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
+			"name": "finalizeAuction",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"inputs": [],
 			"name": "getBidderCount",
 			"outputs": [
@@ -333,6 +314,49 @@
 				}
 			],
 			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				},
+				{
+					"internalType": "uint256",
+					"name": "value",
+					"type": "uint256"
+				},
+				{
+					"internalType": "string",
+					"name": "secret",
+					"type": "string"
+				}
+			],
+			"name": "revealBid",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
+			"name": "startCommitPhase",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "startRevealPhase",
+			"outputs": [],
+			"stateMutability": "nonpayable",
 			"type": "function"
 		}
 	]
