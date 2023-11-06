@@ -2,6 +2,44 @@
     "contract_name": "Auction",
     "abi": [
 		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "bidder",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
+			"name": "LogBid",
+			"type": "event"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"name": "biddersCountByDomain",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
 			"inputs": [
 				{
 					"internalType": "string",
@@ -227,6 +265,25 @@
 				{
 					"internalType": "uint256",
 					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
+			"name": "getBiddersCountByDomain",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "count",
 					"type": "uint256"
 				}
 			],

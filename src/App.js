@@ -5,20 +5,22 @@ import { useEffect, useState } from 'react';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
 import logoImage from './Capture.png';
-const AuctionContractAddress = '0x5F8A26d15346686105D8Cd9373eF84A62EF99A7e';
-// The AuctionContract Address needs to change based on your remix contract
-const emptyAddress = '0x0000000000000000000000000000000000000000';
+const AuctionContractAddress = '0x16D175B4277028D84B3983E9f22bA4fef71F3182';
+// The AuctionContract Address needs to change based on your remix contract everytime you deploy
+const emptyAddress = "0x0000000000000000000000000000000000000000";
 const ethers = require("ethers")
 function App() {
  // Use hooks to manage component state
  const [account, setAccount] = useState('');
  const [domain, setDomain] = useState('');
- const [myBid, setMyBid] = useState(0);
+ const [myBid, setMyBid] = useState();
  const [isOwner, setIsOwner] = useState(false);
- const [bidderCount, setBidderCount] = useState(0);
- const [highestBid, setHighestBid] = useState(0);
+ const [bidderCount, setBidderCount] = useState();
+ const [highestBid, setHighestBid] = useState();
  const [highestBidder, setHighestBidder] = useState('');
  const [ownedDomains, setOwnedDomains] = useState([]);
+ const [currentPhase, setCurrentPhase] = useState('');
+const [commitPhaseEndTime, setCommitPhaseEndTime] = useState(0);
 
  
  // Sets up a new Ethereum provider and returns an interface for interacting with the smart contract
@@ -38,6 +40,8 @@ function App() {
  async function requestAccount() {
    const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
    setAccount(account[0]);
+  
+  
  }
 
  async function fetchHighestBid() {
@@ -48,16 +52,15 @@ function App() {
        
      // Convert bidAmount from Wei to Ether and round value to 4 decimal places
         setHighestBid(parseFloat(formatEther(highestBid.toString())).toPrecision(4));
-        setHighestBidder(highestBidder.toLowerCase());
-          // Fetch the number of bidders
-          const bidderCount = await contract.getBidderCount(); // You need to add this function to your smart contract
-          setBidderCount(bidderCount);
+        setHighestBidder(highestBidder);
+         
       
      } catch (e) {
        console.log('error fetching highest bid: ', e);
      }
    }
  }
+
 
  async function fetchMyBid() {
    if (typeof window.ethereum !== 'undefined') {
@@ -90,13 +93,23 @@ function App() {
     try {
       // User inputs amount in terms of Ether, convert to Wei before sending to the contract.
       const wei = parseEther(value.toString());
+      if (currentPhase === '' && Date.now() >= commitPhaseEndTime) {
+        // await contract.startCommitPhase(domain);
+
+        // Update the phase to Commit and set the commit phase end time
+        setCurrentPhase('Commit');
+        setCommitPhaseEndTime(Date.now() + 60000); // 1 minute
+      }
       // Replace the next line with the actual function call to commitBid
       await contract.commitBid(domain, wei, "myhash");
+    
+
+    // Fetch the bidderCount when the user submits a bid
+      fetchBidderCountForDomain(domain);
      
 
       // Wait for the smart contract to emit the LogBid event, then update component state
       contract.on('LogBid', (_, __) => {
-        fetchMyBid();
         fetchHighestBid();
       });
     } catch (e) {
@@ -104,9 +117,27 @@ function App() {
     }
   }
 }
+ async function fetchBidderCountForDomain(domain) {
+  if (typeof window.ethereum !== 'undefined') {
+    const contract = await initializeProvider();
+    try {
+      // Simulate a delay (e.g., 1 seconds) before fetching the bidder count
+      setTimeout(async () => {
+        console.log(domain);
+        const updatedBidderCount = await contract.getBiddersCountByDomain(domain);
+        console.log('bidderCount:', updatedBidderCount.toNumber());
+        setBidderCount(updatedBidderCount.toNumber());
+      }, 20000); // Adjust the delay time as needed
+     
+    } catch (e) {
+      console.log(`Error fetching bidder count for domain ${domain}:`, e);
+    }
+  }
+}
+
 
   // Function to fetch the list of domains owned by the current account
-  async function fetchOwnedDomains() {
+  async function fetchOwnedDomains(account) {
     if (typeof window.ethereum !== 'undefined') {
       const contract = await initializeProvider();
       try {
@@ -114,6 +145,22 @@ function App() {
         setOwnedDomains(domains);
       } catch (e) {
         console.error('Error fetching owned domains: ', e);
+      }
+    }
+  }
+  async function checkAndFinalizeAuction() {
+    if (currentPhase === 'Commit' && Date.now() >= commitPhaseEndTime) {
+      if (typeof window.ethereum !== 'undefined') {
+        const contract = await initializeProvider();
+        try {
+         
+          // Fetch the highest bid and highest bidder
+          fetchHighestBid();
+          // Update the phase to None
+          setCurrentPhase('-');
+        } catch (e) {
+          console.log('error finalizing auction: ', e);
+        }
       }
     }
   }
@@ -140,6 +187,7 @@ useEffect(() => {
   // Listen for changes in the Ethereum account
   window.ethereum.on('accountsChanged', (newAccounts) => {
     setAccount(newAccounts[0]);
+    
   });
 
   // Fetch initial data
@@ -147,7 +195,12 @@ useEffect(() => {
   fetchOwner();
   fetchMyBid();
   fetchHighestBid();
-  fetchOwnedDomains();
+  fetchOwnedDomains(account);
+
+   // Periodically check and finalize the auction
+   const checkAndFinalizeInterval = setInterval(checkAndFinalizeAuction, 1000);
+   return () => clearInterval(checkAndFinalizeInterval);
+  
 }, [account]);
  
  useEffect(() => {
@@ -204,7 +257,9 @@ useEffect(() => {
         <div className="big-box right-box">
         <h2 className="box-headerright">Bidding for {domain}</h2>
           {/* Content for the right box */}
+         
           <p>Number of bidders: {bidderCount}</p>
+          <p>Current Phase: { currentPhase}</p>
           <p>Auction Highest Bid Amount: {highestBid}</p>
        <p>
          Auction Highest Bidder:{' '}
