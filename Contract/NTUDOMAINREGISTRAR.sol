@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 contract NtuDomainRegistrar {
     address private owner;
+    constructor() {
+        // Set the contract deployer's address as the owner during deployment
+        owner = msg.sender;
+    }
 
    address[] public players;
    uint256 public currentBiddersCount; // To keep track of the number of bidders
@@ -22,12 +26,22 @@ contract NtuDomainRegistrar {
    require(msg.sender == owner, 'Only owner can perform task.');
    _;
  }
+event LogBid(
+    address indexed bidder,
+    string domain,
+    uint256 value,
+    string secret
+);
+event checksender(address sender);
+event checkvalue( uint256 value);
+ 
 
     mapping(string => address) public domainOwner;     // Maps domain to owner address
     mapping(address => string[]) public domainsByOwner; // Bonus requirement: reverse lookup
 
     mapping(string => mapping(address => Bid)) public bids;  // Maps domain to user bids
     mapping(string => Auction) public domainAuctions;
+    mapping(string => uint256) public biddersCountByDomain; // Track bidders count for each domain
 
     Phase public currentPhase = Phase.None;
     uint256 public phaseEndTime;
@@ -36,6 +50,7 @@ contract NtuDomainRegistrar {
 
 
    function getOwner() public view returns (address) {
+    
     return owner;
 }
 
@@ -45,6 +60,7 @@ contract NtuDomainRegistrar {
         require(!domainAuctions[domain].finalized, "Domain has already been auctioned off");
         currentPhase = Phase.Commit;
         phaseEndTime = block.timestamp + commitPhaseDuration;
+        
     }
 
     function commitBid(string memory domain, uint256 value, string memory secret) external payable {
@@ -53,17 +69,25 @@ contract NtuDomainRegistrar {
 
         bytes32 commitment = keccak256(abi.encodePacked(msg.sender, value, secret));
         require(bids[domain][msg.sender].commitment == 0, "Bid already made");
-        require(msg.value == value, "Sent value does not match the committed bid value");
-
+        // require(msg.value == value, "Sent value does not match the committed bid value");
+        emit checkvalue(msg.value);
          if (!checkPlayerExists(msg.sender)) {
             players.push(msg.sender);
+          
         }
         bids[domain][msg.sender] = Bid({
             commitment: commitment,
             deposit: msg.value
+            
         });
-        
-        currentBiddersCount++; // Increment the bidders count
+            currentBiddersCount++; // Increment the bidders count
+            // Increment the bidders count for this domain
+            biddersCountByDomain[domain]++;
+             // Emit the LogBid event
+             emit LogBid(msg.sender, domain, value, secret);
+
+            
+       
     }
 
     // Reveal Phase
@@ -86,6 +110,7 @@ contract NtuDomainRegistrar {
             }
 
             domainAuctions[domain].highestBidder = msg.sender;
+            
             domainAuctions[domain].highestBid = value;
         } 
         // If the value is equal to the highest bid but the bidder is not the current highest bidder
@@ -96,7 +121,9 @@ contract NtuDomainRegistrar {
         else if (value < domainAuctions[domain].highestBid) {
             payable(msg.sender).transfer(value);  // Refund the current bid
         }
+        emit checksender(msg.sender);
     }
+   
 
     // Finalizing Auction
     function finalizeAuction(string memory domain) external {
@@ -106,8 +133,19 @@ contract NtuDomainRegistrar {
         domainOwner[domain] = domainAuctions[domain].highestBidder;
         domainsByOwner[domainAuctions[domain].highestBidder].push(domain);
         domainAuctions[domain].finalized = true;
+        
+
         currentPhase = Phase.None;
+        // Reset the bidders count for this domain
+        // biddersCountByDomain[domain] = 0;
+         currentBiddersCount=0;
+
     }
+     // Fetching the HighestBidder & HighestBid
+    function fetchHighestBid(string memory domain) public view returns (address, uint256) {
+    Auction storage auction = domainAuctions[domain];
+    return (auction.highestBidder, auction.highestBid);
+}
 
     // Resolving Domains & Addresses
     function resolveDomainToAddress(string memory domain) external view returns (address) {
@@ -119,6 +157,10 @@ contract NtuDomainRegistrar {
     }
     function getBidderCount() public view returns (uint256) {
         return currentBiddersCount;
+    }
+
+    function getBiddersCountByDomain(string memory domain) public view returns (uint256 count) {
+        return biddersCountByDomain[domain];
     }
      // Function to check if a player is registered
     function checkPlayerExists(address player) public view returns (bool) {
