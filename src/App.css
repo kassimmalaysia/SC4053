@@ -40,7 +40,6 @@
 }
 
 .left-box {
-  
   flex: 1; /* Make the left box flexible to take available space */
 
 }
@@ -51,7 +50,8 @@
 
 
 .bottom-box {
-  height: 100px; /* Red background for the bottom box */
+  overflow: scroll;
+  flex: 1; /* Red background for the bottom box */
 }
 .box-headerright {
   position: relative;
@@ -123,3 +123,8 @@
   /* Add other styles for the container as necessary */
   /* ... */
 }
+.bid-container {
+  display:flex; /* Adjust the gap according to your preference */
+  gap: 2px;
+}
+
