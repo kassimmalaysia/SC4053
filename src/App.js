@@ -1,5 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import LoadingScreen from './LoadingPage';
 
 // import { ethers } from 'ethers';
 import { parseEther, formatEther } from '@ethersproject/units';
@@ -7,7 +8,7 @@ import Auction from './contracts/Auction.json';
 import logoImage from './images/NTU_Logo.png';
 import listImage from './images/list_logo.png';
 import { hexValue } from 'ethers/lib/utils';
-const AuctionContractAddress = '0xc4f83bc89e96f0dd65622dd8e9bd7f9ca6b5e48e';
+const AuctionContractAddress = '0xa08b7b3f91e4bb8deb1e79c077aa58db00c28df5';
 // The AuctionContract Address needs to change based on your remix contract everytime you deploy
 const emptyAddress = "0x0000000000000000000000000000000000000000";
 const ethers = require("ethers")
@@ -25,9 +26,16 @@ function App() {
  const [currentPhase, setCurrentPhase] = useState('');
 const [commitPhaseEndTime, setCommitPhaseEndTime] = useState(0);
 const [bidAmountUnit, setBidAmountUnit] = useState('wei');
+const [etherAmountUnit, setEtherAmountUnit] = useState('wei');
 const [isCommitPhase, setIsCommitPhase] = useState(true);
 const [etherToSend, setEtherToSend] = useState('');
 const [etherToSendOwner, setEtherToSendOwner] = useState('');
+const [addresstoDomain, setAddresstoDomain] = useState('');
+const [domaintoAddress, setDomaintoAddress] = useState('');
+const [addresstoDomain1, setAddresstoDomain1] = useState('');
+const [domaintoAddress1, setDomaintoAddress1] = useState([]);
+const [loading, setLoading] = useState(true);
+
 
 const handleBidAmountChange = (event) => {
   setMyBid(event.target.value);
@@ -38,6 +46,9 @@ const handleEtherAmountChange = (event) => {
 
 const handleBidUnitChange = (event) => {
   setBidAmountUnit(event.target.value);
+};
+const handleEtherUnitChange = (event) => {
+  setEtherAmountUnit(event.target.value);
 };
 const convertBidToWei = () => {
   const bidValue = parseFloat(myBid);
@@ -88,9 +99,30 @@ const handleSubmit = (event) => {
   }
   const convertedBidValue = convertBidToWei();
   console.log(convertedBidValue);
+    // Show loading popup
+    setLoading(true);
 
   // Your existing submitBid logic here
   submitBid(event, domain, convertedBidValue, 'myhash');
+
+  // Hide loading popup after 20 seconds
+  
+};
+
+
+const handleDomaintoAddress = (event) => {
+  event.preventDefault();
+
+  // Your logic for handling the commit action
+  DomaintoAddress(event, domaintoAddress);
+
+  // Reset form fields if needed
+};
+const handleAddresstoDomain = (event) => {
+  event.preventDefault();
+
+  // Your logic for handling the commit action
+  AddresstoDomain(event,addresstoDomain );
 
   // Reset form fields if needed
 };
@@ -108,6 +140,7 @@ const handleEtherToSendChange = (event) => {
   // Your existing submitBid logic here
   sendEtherToOwner(event, etherToSendOwner, convertedBidValue);
 };
+
 
  
  // Sets up a new Ethereum provider and returns an interface for interacting with the smart contract
@@ -185,8 +218,11 @@ async function startCommit(event,domain) {
       console.log(ether);
 
       // Replace the next line with the actual function call to commitBid
-      await contract.commitBid(domain,ether, "myhash");
-      fetchBidderCountForDomain(domain);
+      setTimeout(async() => {
+        await contract.commitBid(domain,ether, "myhash");
+        fetchBidderCountForDomain(domain);
+      }, 10000);
+      
     // Fetch the bidderCount when the user submits a bid
      
       // Wait for the smart contract to emit the LogBid event, then update component state
@@ -310,6 +346,44 @@ async function fetchHighestBid(domain) {
         }
     }
 }
+async function AddresstoDomain(event, address) {
+  event.preventDefault();
+  if (typeof window.ethereum !== 'undefined') {
+      const contract = await initializeProvider();
+      try {
+          const result = await contract.resolveAddressToDomains(address);
+          let res = result;
+          if(res.length === 0)
+          {
+            res = 'NA';
+          }
+          setAddresstoDomain1(res);
+          console.log('Domain:', result );
+          // Update state or perform other actions with the list of domains in commit phase
+      } catch (e) {
+          console.error('Error fetching Address from domain:', e);
+      }
+  }
+}
+async function DomaintoAddress(event, domain) {
+  event.preventDefault();
+  if (typeof window.ethereum !== 'undefined') {
+      const contract = await initializeProvider();
+      try {
+          const result  = await contract.resolveDomainToAddress(domain);
+          let res = result;
+          if(res === emptyAddress)
+          {
+            res = 'No Owner';
+          }
+          setDomaintoAddress1(res );
+          console.log('Address:', res);
+          // Update state or perform other actions with the list of domains in commit phase
+      } catch (e) {
+          console.error('Error fetching domain from Address:', e);
+      }
+  }
+}
 
   async function fetchBidderCountForDomain(domain) {
     if (typeof window.ethereum !== 'undefined') {
@@ -328,10 +402,12 @@ async function fetchHighestBid(domain) {
       }
     }
   }
+  
   async function sendEtherToOwner(event,domain,etherToSend){
     event.preventDefault();
     if (typeof window.ethereum !== 'undefined') {
       const contract = await initializeProvider();
+      let value = 0;
       console.log(domain,etherToSend);
   
       try {
@@ -355,9 +431,21 @@ async function fetchHighestBid(domain) {
             },
           ],
         });
+        console.log(bidAmountUnit);
+        if (bidAmountUnit === 'gwei')
+        {
+          value=weiToSend/1e9;
+        }
+        else if(bidAmountUnit === 'ether')
+        {
+          value=weiToSend/1e18;
+        }
+        else
+            value=weiToSend;
+        
     
             // Display a success message
-            alert(`Successfully sent ${etherToSend} Ether to the owner of ${domain}.`);
+            alert(`Successfully sent ${value} ${bidAmountUnit} to the owner of ${domain}.`);
           } else {
             alert(`Domain ${domain} is not registered.`);
           }
@@ -386,7 +474,9 @@ async function fetchHighestBid(domain) {
 //    }
 //  }
 
-
+useEffect(() => {
+  setTimeout(() => setLoading(false), 20000)
+}, [])
 
 useEffect(() => {
   // Listen for changes in the Ethereum account
@@ -421,11 +511,12 @@ useEffect(() => {
            alt="Logo" 
           />
         </div>
-        <div className="title">DNS Aution House</div>
+        <div className="title">.ntu Auction House</div>
       </div>
       {/* Big Boxes */}
       <div className="flex-container">
-        <div className="big-box left-box" style={{height:"435px"}}>
+      <div className="box-container" style={{ width: '50%' }}>
+        <div className="big-box left-box" style={{height:"250px"}}>
         <h2 className="box-headerleft">My Account</h2>
           {/* Content for the left box */}
           <p>Connected Account: {account}</p>
@@ -444,32 +535,64 @@ useEffect(() => {
       type="text"
       placeholder="Enter Domain Name"
       />
+      <p></p>
       </div>
-      <div className="bid-container">
-      <div>
-      <label htmlFor="EtherInput">Bid Amount </label>
-    <input
-        id="weiInput"
-      value={myBid}
-      onChange={handleBidAmountChange}
-      name="Bid Amount"
-      type="text"
-      placeholder="Enter Bid Amount"
-      />
-       </div>
-       <div>
-          <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
-            <option value="wei">Wei</option>
-            <option value="gwei">Gwei</option>
-            <option value="ether">Ether</option>
-          </select>
+      {/* {loading && <LoadingScreen />} */}
+      {isCommitPhase ? (
+      
+        <button type='button' className='button' onClick={handleCommit}>Commit</button>
+    ) : (
+      
+      <div >
+            <div>
+            
+                <label htmlFor="EtherInput">Bid Amount: </label>
+                <input
+                    id="weiInput"
+                    style={{width:"60%", margin: "5px"}}
+                    value={myBid}
+                    onChange={handleBidAmountChange}
+                    name="Bid Amount"
+                    type="text"
+                    placeholder="Enter Bid Amount"
+                />
+                <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
+                    <option value="wei">Wei</option>
+                    <option value="gwei">Gwei</option>
+                    <option value="ether">Ether</option>
+                </select>
+            </div>
+         
+                
+            <p></p>
+            <button type='button' className='button' onClick={handleSubmit}>Submit</button>
         </div>
-        </div>
-           <button type="submit">Submit</button>
+        
+    )}
+
          </form>
+       
+
         </div>
-        <div className="box-container" style={{ width: '50%' }}>
-        <div className="big-box right-box">
+        <div className='big-box left-box'>
+        <h2 className='box-headerleft'>Search Owner by Domain</h2>
+        <p></p>
+        <label htmlFor='searchOwner'>Owner of Domain: </label>
+        <input
+        style={{width: "60%", margin: "5px"}}
+        id='searchOwner'
+        value={domaintoAddress}
+        onChange={(event) => setDomaintoAddress(event.target.value)}
+        name='Search Owner'
+        type='text'
+        placeholder='Enter Valid Domain'/>
+        <p></p>
+        <p>Search Result: {domaintoAddress1}</p>
+        <button type='button' className='button' onClick={handleDomaintoAddress}>Search</button>
+        </div>
+        </div>
+        <div className="box-container" style={{ width: '50%' }} >
+        <div className="big-box right-box"style={{height:"250px"}}>
         <h2 className="box-headerright">Bidding for {domain}</h2>
           {/* Content for the right box */}
          
@@ -498,28 +621,22 @@ useEffect(() => {
       </div>
       <div className='flex-container'>
         <div className='big-box left-box'>
-        <h2 className='box-headerleft'>Searching Tools</h2>
-        <p></p>
-        <label htmlFor='searchOwner'>Owner of Domain: </label>
-        <input
-        style={{width: "60%", margin: "5px"}}
-        id='searchOwner'
-        /*value={} For future use*/
-        name='Search Owner'
-        type='text'
-        placeholder='Enter Valid Domain'/>
+        <h2 className='box-headerleft'>Search Domain by Owner</h2>
         <p></p>
         <label htmlFor='searchDomain'>Domain of Owner: </label>
         <input
         style={{width: "60%", margin: "5px"}}
         id='searchDomain'
-        /*value={} For future use*/
+        value={addresstoDomain}
+        onChange={(event) => setAddresstoDomain(event.target.value)}
         name='Search Domain'
         type='text'
         placeholder='Enter Valid Public Address'/>
-        <p>Search Result:</p>
-        <button type='button' className='button' /*onClick={}*/>Search</button>
+        <p>Search Result: {addresstoDomain1}</p>
+        <button type='button' className='button' onClick={handleAddresstoDomain}>Search</button>
         </div>
+      
+        
         <div className='big-box right-box'>
           <h2 className='box-headerleft'>Send ETH to Domain</h2>
           <p></p>
@@ -527,21 +644,33 @@ useEffect(() => {
         <input
         style={{width: "60%", margin: "5px"}}
         id='transferDomain'
-        /*value={} For future use*/
+        value={etherToSendOwner}
+        onChange={(event) => setEtherToSendOwner(event.target.value)}
+
         name='Transfer Domain'
         type='text'
         placeholder='Enter Valid Domain'/>
         <p></p>
-        <label htmlFor='transferAmt'style={{marginRight: "13px"}}>Amount (ETH): </label>
+        <label htmlFor='transferAmt'style={{marginRight: "13px"}}>Amount : </label>
         <input
         style={{width: "60%", margin: "5px"}}
         id='transferAmt'
-        /*value={} For future use*/
+        value={etherToSend}
+        onChange={handleEtherAmountChange}
         name='Transfer Amount'
         type='text'
-        placeholder='Enter ETH Amount to Send'/>
-        <p>Transfer Status:</p>
-        <button type='button' className='button' /*onClick={}*/>Transfer</button>
+        placeholder='Enter  Amount to Send'/>
+        
+                <select id="bidUnit" value={etherAmountUnit} onChange={handleEtherUnitChange}>
+                    <option value="wei">Wei</option>
+                    <option value="gwei">Gwei</option>
+                    <option value="ether">Ether</option>
+                </select>
+            
+
+        <p></p>
+
+        <button type='button' className='button' onClick={handleEtherToSendChange}>Transfer</button>
         </div>
       </div>
       <div className="big-box bottom-box">
