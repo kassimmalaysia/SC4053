@@ -25,9 +25,14 @@ function App() {
 const [commitPhaseEndTime, setCommitPhaseEndTime] = useState(0);
 const [bidAmountUnit, setBidAmountUnit] = useState('wei');
 const [isCommitPhase, setIsCommitPhase] = useState(true);
+const [etherToSend, setEtherToSend] = useState('');
+const [etherToSendOwner, setEtherToSendOwner] = useState('');
 
 const handleBidAmountChange = (event) => {
   setMyBid(event.target.value);
+};
+const handleEtherAmountChange = (event) => {
+  setEtherToSend(event.target.value);
 };
 
 const handleBidUnitChange = (event) => {
@@ -47,6 +52,21 @@ const convertBidToWei = () => {
       return 0;
   }
 };
+const convertEtherToWei = () => {
+  const bidValue = parseFloat(etherToSend);
+
+  switch (bidAmountUnit) {
+    case 'wei':
+      return bidValue;
+    case 'gwei':
+      return bidValue * 1e9; // 1 Gwei = 1e9 Wei
+    case 'ether':
+      return bidValue * 1e18; // 1 Ether = 1e18 Wei
+    default:
+      return 0;
+  }
+};
+
 const handleCommit = (event) => {
   event.preventDefault();
 
@@ -72,6 +92,20 @@ const handleSubmit = (event) => {
   submitBid(event, domain, convertedBidValue, 'myhash');
 
   // Reset form fields if needed
+};
+const handleEtherToSendChange = (event) => {
+  event.preventDefault();
+  // Validate bid amount
+  const minBidAmount = 1;
+  if (isNaN(etherToSend) || etherToSend < minBidAmount) {
+      alert('Minimum amount to send is 1 wei. Please enter a higher amount.');
+      return;
+  }
+  const convertedBidValue = convertEtherToWei();
+  console.log(convertedBidValue);
+
+  // Your existing submitBid logic here
+  sendEtherToOwner(event, etherToSendOwner, convertedBidValue);
 };
 
  
@@ -293,6 +327,48 @@ async function fetchHighestBid(domain) {
       }
     }
   }
+  async function sendEtherToOwner(event,domain,etherToSend){
+    event.preventDefault();
+    if (typeof window.ethereum !== 'undefined') {
+      const contract = await initializeProvider();
+      console.log(domain,etherToSend);
+  
+      try {
+        // Get the owner of the specified domain
+        const owner = await contract.resolveDomainToAddress(domain);
+       
+          if (owner !== emptyAddress) {
+            const weiToSend = parseInt(hexValue(etherToSend), 16);
+            console.log(weiToSend);
+            console.log(owner);
+    
+            // Call the function to send Ether to the domain owner
+           // Send Ether directly to the owner
+        await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [
+            {
+              from: account,
+              to: owner,
+              value: `0x${weiToSend.toString(16)}`, // Convert Wei to hexadecimal string
+            },
+          ],
+        });
+    
+            // Display a success message
+            alert(`Successfully sent ${etherToSend} Ether to the owner of ${domain}.`);
+          } else {
+            alert(`Domain ${domain} is not registered.`);
+          }
+      
+  
+        // Check if the owner is not the empty address (meaning the domain is registered)
+        
+      } catch (e) {
+        console.error('Error sending Ether to owner:', e);
+      }
+    }
+  };
 //  async function withdraw() {
 //    if (typeof window.ethereum !== 'undefined') {
 //      const contract = await initializeProvider();
@@ -372,6 +448,7 @@ useEffect(() => {
     ) : (
       <div className="bid-container">
             <div>
+              
                 <label htmlFor="EtherInput">Bid Amount </label>
                 <input
                     id="weiInput"
@@ -392,6 +469,44 @@ useEffect(() => {
             <button type="button" onClick={handleSubmit}>Submit</button>
         </div>
     )}
+    
+</form>
+<form>
+    <div className="bid-container"></div>
+    <div>
+    <label htmlFor="domainInput ">Domain Name </label>
+      <input
+      id="domainInput"
+      value={etherToSendOwner}
+      onChange={(event) => setEtherToSendOwner(event.target.value)}
+      name="Domain Name"
+      type="text"
+      placeholder="Enter Domain Name"
+      />
+      </div>
+      
+      <div className="bid-container">
+            <div>
+              
+                <label htmlFor="EtherInput">Amount to send </label>
+                <input
+                    id="weiInput"
+                    value={etherToSend}
+                    onChange={handleEtherAmountChange}
+                    name="Amount"
+                    type="text"
+                    placeholder="Enter Amount"
+                />
+            </div>
+            <div>
+                <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
+                    <option value="wei">Wei</option>
+                    <option value="gwei">Gwei</option>
+                    <option value="ether">Ether</option>
+                </select>
+            </div>
+            <button type="button" onClick={handleEtherToSendChange}>Send Ether</button>
+        </div>   
 </form>
         </div>
         <div className="box-container" style={{ width: '50%' }}>
