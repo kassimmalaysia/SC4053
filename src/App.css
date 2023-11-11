@@ -47,6 +47,11 @@
 .right-box {
   flex: 1; /* Make the right box flexible to take available space */
 }
+.bottomright-box {
+  overflow: scroll;
+  flex: 1; /* Make the right box flexible to take available space */
+}
+
 
 
 .bottom-box {

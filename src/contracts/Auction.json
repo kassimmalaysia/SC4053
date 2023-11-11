@@ -267,6 +267,25 @@
 		{
 			"inputs": [
 				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "domainsInCommitPhase",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
 					"internalType": "string",
 					"name": "domain",
 					"type": "string"
@@ -328,6 +347,19 @@
 					"internalType": "uint256",
 					"name": "count",
 					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getDomainsInCommitPhase",
+			"outputs": [
+				{
+					"internalType": "string[]",
+					"name": "",
+					"type": "string[]"
 				}
 			],
 			"stateMutability": "view",

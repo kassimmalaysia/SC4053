@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
 import logoImage from './Capture.png';
-const AuctionContractAddress = '0xf47575dbe289ed5d6dd74daa7d122fa370bca231';
+import { hexValue } from 'ethers/lib/utils';
+const AuctionContractAddress = '0xc4f83bc89e96f0dd65622dd8e9bd7f9ca6b5e48e';
 // The AuctionContract Address needs to change based on your remix contract everytime you deploy
 const emptyAddress = "0x0000000000000000000000000000000000000000";
 const ethers = require("ethers")
@@ -19,9 +20,11 @@ function App() {
  const [highestBid, setHighestBid] = useState();
  const [highestBidder, setHighestBidder] = useState('');
  const [ownedDomains, setOwnedDomains] = useState([]);
+ const [commitedDomain, setCommitedDomain] = useState([]);
  const [currentPhase, setCurrentPhase] = useState('');
 const [commitPhaseEndTime, setCommitPhaseEndTime] = useState(0);
 const [bidAmountUnit, setBidAmountUnit] = useState('wei');
+const [isCommitPhase, setIsCommitPhase] = useState(true);
 
 const handleBidAmountChange = (event) => {
   setMyBid(event.target.value);
@@ -29,6 +32,46 @@ const handleBidAmountChange = (event) => {
 
 const handleBidUnitChange = (event) => {
   setBidAmountUnit(event.target.value);
+};
+const convertBidToWei = () => {
+  const bidValue = parseFloat(myBid);
+
+  switch (bidAmountUnit) {
+    case 'wei':
+      return bidValue;
+    case 'gwei':
+      return bidValue * 1e9; // 1 Gwei = 1e9 Wei
+    case 'ether':
+      return bidValue * 1e18; // 1 Ether = 1e18 Wei
+    default:
+      return 0;
+  }
+};
+const handleCommit = (event) => {
+  event.preventDefault();
+
+  // Your logic for handling the commit action
+  startCommit(event, domain);
+
+  // Reset form fields if needed
+};
+
+const handleSubmit = (event) => {
+  event.preventDefault();
+
+  // Validate bid amount
+  const minBidAmount = 1;
+  if (isNaN(myBid) || myBid < minBidAmount) {
+      alert('Minimum bid is 1 wei. Please enter a higher bid.');
+      return;
+  }
+  const convertedBidValue = convertBidToWei();
+  console.log(convertedBidValue);
+
+  // Your existing submitBid logic here
+  submitBid(event, domain, convertedBidValue, 'myhash');
+
+  // Reset form fields if needed
 };
 
  
@@ -50,20 +93,7 @@ const handleBidUnitChange = (event) => {
    const account = await window.ethereum.request({ method: 'eth_requestAccounts' });
    setAccount(account[0]);
  }
- const convertBidToWei = () => {
-  const bidValue = parseFloat(myBid);
-
-  switch (bidAmountUnit) {
-    case 'wei':
-      return bidValue;
-    case 'gwei':
-      return bidValue * 1e9; // 1 Gwei = 1e9 Wei
-    case 'ether':
-      return bidValue * 1e18; // 1 Ether = 1e18 Wei
-    default:
-      return 0;
-  }
-};
+ 
 
 //  async function fetchMyBid() {
 //    if (typeof window.ethereum !== 'undefined') {
@@ -88,7 +118,23 @@ const handleBidUnitChange = (event) => {
 //      }
 //    }
 //  }
-
+async function startCommit(event,domain) {
+  event.preventDefault();
+  if (typeof window.ethereum !== 'undefined') {
+    const contract = await initializeProvider();
+    try {
+      console.log("in Start commit");
+        await contract.startCommitPhase(domain);
+        // Update the phase to Commit and set the commit phase end time
+        setCurrentPhase('Start');
+        // Schedule revealBid to be called after the commit phase ends
+        setIsCommitPhase(false);
+  
+    } catch (e) {
+      console.log('error in starting the bidding: ', e);
+    }
+  }
+}
  async function submitBid(event, domain, value, secret) {
   event.preventDefault();
   if (typeof window.ethereum !== 'undefined') {
@@ -96,18 +142,18 @@ const handleBidUnitChange = (event) => {
     try {
       console.log(value);
       const ether =  value.toString();
-      
-      
-        // await contract.startCommitPhase(domain);
+      console.log("in commit");
         // Update the phase to Commit and set the commit phase end time
         setCurrentPhase('Commit');
         // Schedule revealBid to be called after the commit phase ends
 
       console.log(ether);
+
       // Replace the next line with the actual function call to commitBid
       await contract.commitBid(domain,ether, "myhash");
-    // Fetch the bidderCount when the user submits a bid
       fetchBidderCountForDomain(domain);
+    // Fetch the bidderCount when the user submits a bid
+     
       // Wait for the smart contract to emit the LogBid event, then update component state
       contract.on('LogBid', (account, domain, ether, secret) => {
         setTimeout(() => {
@@ -147,8 +193,9 @@ async function revealBid(domain, value,secret) {
       const contract = await initializeProvider();
       try {
          // Start Reveal Bid
-         console.log("in Reveal Bid" ,domain, parseInt(value, 16),secret);
-        await contract.revealBid(domain, parseInt(value, 16),"myhash");
+         setCurrentPhase('Comparing Bids');
+         console.log("in Reveal Bid" ,domain, parseInt(hexValue(value), 16),secret);
+        await contract.revealBid(domain, parseInt(hexValue(value), 16),"myhash");
         
        
       
@@ -174,7 +221,7 @@ async function checkAndFinalizeAuction(domain) {
         setTimeout(() => {    
           // Update the phase to None
           setCurrentPhase('Finalized');
-            }, 60000); // 1 minute
+            }, 25000); // 25 secs
       } catch (e) {
         console.log('error finalizing auction: ', e);
       }
@@ -215,6 +262,19 @@ async function fetchHighestBid(domain) {
       }
     }
   }
+  async function fetchDomainsInCommitPhase() {
+    if (typeof window.ethereum !== 'undefined') {
+        const contract = await initializeProvider();
+        try {
+            const domainsInCommitPhase = await contract.getDomainsInCommitPhase();
+            setCommitedDomain(domainsInCommitPhase);
+            console.log('Domains in Commit Phase:', domainsInCommitPhase);
+            // Update state or perform other actions with the list of domains in commit phase
+        } catch (e) {
+            console.error('Error fetching domains in commit phase:', e);
+        }
+    }
+}
 
   async function fetchBidderCountForDomain(domain) {
     if (typeof window.ethereum !== 'undefined') {
@@ -260,12 +320,12 @@ useEffect(() => {
 
   // Fetch initial data
   requestAccount();
-  fetchHighestBid();
+  fetchDomainsInCommitPhase();
   fetchOwnedDomains(account);
 
    // Periodically check and finalize the auction
-   const checkAndFinalizeInterval = setInterval(checkAndFinalizeAuction, 1000);
-   return () => clearInterval(checkAndFinalizeInterval);
+  //  const checkAndFinalizeInterval = setInterval(checkAndFinalizeAuction, 1000);
+  //  return () => clearInterval(checkAndFinalizeInterval);
   
 }, [account]);
  
@@ -294,24 +354,8 @@ useEffect(() => {
           <p>Connected Account: {account}</p>
           <p>My Bid: {myBid}</p>
           
-    <form onSubmit={(event) => {
-          event.preventDefault();
-
-          // Validate bid amount
-          const minBidAmount = 1;
-          if (isNaN(myBid) || myBid < minBidAmount) {
-            alert('Minimum bid is 1 wei. Please enter a higher bid.');
-            return;
-          }
-          const convertedBidValue = convertBidToWei();
-          console.log(convertedBidValue);
-
-          // Your existing submitBid logic here
-          submitBid(event, domain, convertedBidValue, 'myhash');
-
-          // Reset form fields
-          
-        }}>
+    <form>
+    <div className="bid-container"></div>
     <div>
     <label htmlFor="domainInput ">Domain Name </label>
       <input
@@ -323,28 +367,32 @@ useEffect(() => {
       placeholder="Enter Domain Name"
       />
       </div>
+      {isCommitPhase ? (
+        <button type="button" onClick={handleCommit}>Commit</button>
+    ) : (
       <div className="bid-container">
-      <div>
-      <label htmlFor="EtherInput">Bid Amount </label>
-    <input
-        id="weiInput"
-      value={myBid}
-      onChange={handleBidAmountChange}
-      name="Bid Amount"
-      type="text"
-      placeholder="Enter Bid Amount"
-      />
-       </div>
-       <div>
-          <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
-            <option value="wei">Wei</option>
-            <option value="gwei">Gwei</option>
-            <option value="ether">Ether</option>
-          </select>
+            <div>
+                <label htmlFor="EtherInput">Bid Amount </label>
+                <input
+                    id="weiInput"
+                    value={myBid}
+                    onChange={handleBidAmountChange}
+                    name="Bid Amount"
+                    type="text"
+                    placeholder="Enter Bid Amount"
+                />
+            </div>
+            <div>
+                <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
+                    <option value="wei">Wei</option>
+                    <option value="gwei">Gwei</option>
+                    <option value="ether">Ether</option>
+                </select>
+            </div>
+            <button type="button" onClick={handleSubmit}>Submit</button>
         </div>
-        </div>
-           <button type="submit">Submit</button>
-         </form>
+    )}
+</form>
         </div>
         <div className="box-container" style={{ width: '50%' }}>
         <div className="big-box right-box">
@@ -360,17 +408,24 @@ useEffect(() => {
        </p>
         </div>
         
-        <div className="big-box right-box">
+        <div className="big-box bottomright-box">
         <h2 className="box-headerright">Market</h2>
           {/* Content for the right box */}
-          <p>Auction Highest Bid Amount: {highestBid}</p>
+          <div >
+        <p></p>
+        <ul >
+          {commitedDomain.map((domain, index) => (
+            <li key={index}>{domain}</li>
+          ))}
+        </ul>
+        </div>
         </div>
         </div>
       </div>
       <div className="big-box bottom-box">
       <h2 className="box-headerleft">Domains Owned by {account}:</h2>
         {/* Content for the bottom box */}
-        <div style={{ marginTop: '20px' }}>
+        <div >
         <p></p>
         <ul >
           {ownedDomains.map((domain, index) => (
