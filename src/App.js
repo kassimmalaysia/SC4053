@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 // import { ethers } from 'ethers';
 import { parseEther, formatEther } from '@ethersproject/units';
 import Auction from './contracts/Auction.json';
-import logoImage from './Capture.png';
+import logoImage from './images/NTU_Logo.png';
+import listImage from './images/list_logo.png';
 import { hexValue } from 'ethers/lib/utils';
 const AuctionContractAddress = '0xc4f83bc89e96f0dd65622dd8e9bd7f9ca6b5e48e';
 // The AuctionContract Address needs to change based on your remix contract everytime you deploy
@@ -420,12 +421,12 @@ useEffect(() => {
            alt="Logo" 
           />
         </div>
-        <div className="title">.NTU Domain Registrar</div>
+        <div className="title">DNS Aution House</div>
       </div>
       {/* Big Boxes */}
       <div className="flex-container">
-        <div className="big-box left-box">
-        <h2 className="box-headerleft">Account</h2>
+        <div className="big-box left-box" style={{height:"435px"}}>
+        <h2 className="box-headerleft">My Account</h2>
           {/* Content for the left box */}
           <p>Connected Account: {account}</p>
           <p>My Bid: {myBid}</p>
@@ -433,8 +434,9 @@ useEffect(() => {
     <form>
     <div className="bid-container"></div>
     <div>
-    <label htmlFor="domainInput ">Domain Name </label>
+    <label htmlFor="domainInput ">Domain Name: </label>
       <input
+      style={{width:"60%"}}
       id="domainInput"
       value={domain}
       onChange={(event) => setDomain(event.target.value)}
@@ -443,71 +445,28 @@ useEffect(() => {
       placeholder="Enter Domain Name"
       />
       </div>
-      {isCommitPhase ? (
-        <button type="button" onClick={handleCommit}>Commit</button>
-    ) : (
       <div className="bid-container">
-            <div>
-              
-                <label htmlFor="EtherInput">Bid Amount </label>
-                <input
-                    id="weiInput"
-                    value={myBid}
-                    onChange={handleBidAmountChange}
-                    name="Bid Amount"
-                    type="text"
-                    placeholder="Enter Bid Amount"
-                />
-            </div>
-            <div>
-                <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
-                    <option value="wei">Wei</option>
-                    <option value="gwei">Gwei</option>
-                    <option value="ether">Ether</option>
-                </select>
-            </div>
-            <button type="button" onClick={handleSubmit}>Submit</button>
-        </div>
-    )}
-    
-</form>
-<form>
-    <div className="bid-container"></div>
-    <div>
-    <label htmlFor="domainInput ">Domain Name </label>
-      <input
-      id="domainInput"
-      value={etherToSendOwner}
-      onChange={(event) => setEtherToSendOwner(event.target.value)}
-      name="Domain Name"
+      <div>
+      <label htmlFor="EtherInput">Bid Amount </label>
+    <input
+        id="weiInput"
+      value={myBid}
+      onChange={handleBidAmountChange}
+      name="Bid Amount"
       type="text"
-      placeholder="Enter Domain Name"
+      placeholder="Enter Bid Amount"
       />
-      </div>
-      
-      <div className="bid-container">
-            <div>
-              
-                <label htmlFor="EtherInput">Amount to send </label>
-                <input
-                    id="weiInput"
-                    value={etherToSend}
-                    onChange={handleEtherAmountChange}
-                    name="Amount"
-                    type="text"
-                    placeholder="Enter Amount"
-                />
-            </div>
-            <div>
-                <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
-                    <option value="wei">Wei</option>
-                    <option value="gwei">Gwei</option>
-                    <option value="ether">Ether</option>
-                </select>
-            </div>
-            <button type="button" onClick={handleEtherToSendChange}>Send Ether</button>
-        </div>   
-</form>
+       </div>
+       <div>
+          <select id="bidUnit" value={bidAmountUnit} onChange={handleBidUnitChange}>
+            <option value="wei">Wei</option>
+            <option value="gwei">Gwei</option>
+            <option value="ether">Ether</option>
+          </select>
+        </div>
+        </div>
+           <button type="submit">Submit</button>
+         </form>
         </div>
         <div className="box-container" style={{ width: '50%' }}>
         <div className="big-box right-box">
@@ -537,10 +496,58 @@ useEffect(() => {
         </div>
         </div>
       </div>
+      <div className='flex-container'>
+        <div className='big-box left-box'>
+        <h2 className='box-headerleft'>Searching Tools</h2>
+        <p></p>
+        <label htmlFor='searchOwner'>Owner of Domain: </label>
+        <input
+        style={{width: "60%", margin: "5px"}}
+        id='searchOwner'
+        /*value={} For future use*/
+        name='Search Owner'
+        type='text'
+        placeholder='Enter Valid Domain'/>
+        <p></p>
+        <label htmlFor='searchDomain'>Domain of Owner: </label>
+        <input
+        style={{width: "60%", margin: "5px"}}
+        id='searchDomain'
+        /*value={} For future use*/
+        name='Search Domain'
+        type='text'
+        placeholder='Enter Valid Public Address'/>
+        <p>Search Result:</p>
+        <button type='button' className='button' /*onClick={}*/>Search</button>
+        </div>
+        <div className='big-box right-box'>
+          <h2 className='box-headerleft'>Send ETH to Domain</h2>
+          <p></p>
+        <label htmlFor='transferDomain'>Send to Domain: </label>
+        <input
+        style={{width: "60%", margin: "5px"}}
+        id='transferDomain'
+        /*value={} For future use*/
+        name='Transfer Domain'
+        type='text'
+        placeholder='Enter Valid Domain'/>
+        <p></p>
+        <label htmlFor='transferAmt'style={{marginRight: "13px"}}>Amount (ETH): </label>
+        <input
+        style={{width: "60%", margin: "5px"}}
+        id='transferAmt'
+        /*value={} For future use*/
+        name='Transfer Amount'
+        type='text'
+        placeholder='Enter ETH Amount to Send'/>
+        <p>Transfer Status:</p>
+        <button type='button' className='button' /*onClick={}*/>Transfer</button>
+        </div>
+      </div>
       <div className="big-box bottom-box">
       <h2 className="box-headerleft">Domains Owned by {account}:</h2>
         {/* Content for the bottom box */}
-        <div >
+        <div style={{ marginTop: '20px' }}>
         <p></p>
         <ul >
           {ownedDomains.map((domain, index) => (
