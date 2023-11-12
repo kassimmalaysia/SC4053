@@ -57,7 +57,9 @@ To get free ether, please visit https://sepoliafaucet.com/
 #### 2.2 Deploying with Remix-Ethereum IDE
 
 Go to https://remix.ethereum.org/.
+
 ![image](https://github.com/kassimmalaysia/SC4053/assets/101180214/41c2b5af-e0cc-49a3-8be4-288b34cddf96)
+
 under test, right-click on it and upload the smart contract which can be found under the Contract Folder
 
 ![image](https://github.com/kassimmalaysia/SC4053/assets/101180214/9fdf7043-07fa-4928-a627-88ded151739d)
