@@ -1,4 +1,4 @@
-# SC4053 Blockchain Technology Group ReverseOreo: '.ntu Auction House'
+# SC4053 Blockchain Technology Group ReverseOreo: .ntu Auction House
 
 Welcome to the repository of Group ReverseOreo: .ntu Auction House 
 
@@ -80,6 +80,9 @@ Select the Injected Environment to connect Metamask to Remix. Click on Deploy .D
 
 <a name="FrontEnd"></a>
 ## Setting Up the React Front End Web Application
+In the code, please edit the Contract Address with what you have obtained from Remix.
+
+![image](https://github.com/kassimmalaysia/SC4053/assets/101180214/71518899-91ed-4cb9-baea-9f6a569ae4c8)
 
 Execute the following commands to initialise the React Web Application.
 
