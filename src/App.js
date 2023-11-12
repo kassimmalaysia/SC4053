@@ -236,7 +236,7 @@ function App() {
             const phase = await contract.retrieveDomainPhase(domain);
             console.log(`Current Phase for ${domain}:`, phase);
           
-        if (phase === 'Commit') {
+        if (phase === 'Commit' || phase === 'None' ) {
           console.log("Committing");
           setCurrentPhase(phase);
           await contract.commitBid(domain, ether, "myhash");
