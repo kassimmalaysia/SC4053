@@ -10,6 +10,19 @@
 			"anonymous": false,
 			"inputs": [
 				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "newBidderCount",
+					"type": "uint256"
+				}
+			],
+			"name": "BidderCountChanged",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
 					"indexed": true,
 					"internalType": "address",
 					"name": "bidder",
@@ -135,7 +148,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
 			"name": "currentPhase",
 			"outputs": [
 				{
@@ -409,6 +428,25 @@
 					"internalType": "string",
 					"name": "domain",
 					"type": "string"
+				}
+			],
+			"name": "retrieveDomainPhase",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "",
+					"type": "string"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
 				},
 				{
 					"internalType": "uint256",
@@ -440,7 +478,13 @@
 			"type": "function"
 		},
 		{
-			"inputs": [],
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "domain",
+					"type": "string"
+				}
+			],
 			"name": "startRevealPhase",
 			"outputs": [],
 			"stateMutability": "nonpayable",
