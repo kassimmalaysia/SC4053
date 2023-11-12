@@ -47,6 +47,7 @@ git clone https://github.com//kassimmalaysia/SC4053.git
 Once you have installed Metamask. You will have to create accounts in the Test Network.
 
 ![image](https://github.com/kassimmalaysia/SC4053/assets/101180214/24181b05-2f1b-45fe-82cd-97a9b7b9051c)
+
 After you have created a account, select Sepolia network
 
 ![image](https://github.com/kassimmalaysia/SC4053/assets/101180214/7c88e66f-7605-4195-8f33-598d089572e6)
