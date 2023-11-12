@@ -2,7 +2,7 @@
 
 Welcome to the repository of Group ReverseOreo: .ntu Auction House 
 
-Our group consist of  **Kassim**, **Elijah**, and **Alexx**, and  we have implemented a Decentralized Domain Registrar that allows users on the Ethereum Network to bid for unregistered domain names .
+Our group consist of  **Kassim**, **Elijah**, and **Alex**, and  we have implemented a Decentralized Domain Registrar that allows users on the Ethereum Network to bid for unregistered domain names .
 
 The Decentralized Domain Registrar, titled **'.ntu Auction House'**, , an innovative decentralized DNS registrar built on the Ethereum blockchain. I'm excited to walk you through the features and functionality of our web application. At .ntu Auction House, our goal is to provide a seamless and transparent auction experience for users looking to bid on and acquire unique domain names.
 
